@@ -1,7 +1,8 @@
+import { randomUUID } from "node:crypto";
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import z from "zod";
 
-export function voteOnPoll(app: FastifyInstance) {
+export async function voteOnPoll(app: FastifyInstance) {
   app.post(
     "/polls/:pollId/votes",
     async (request: FastifyRequest, reply: FastifyReply) => {
@@ -16,7 +17,18 @@ export function voteOnPoll(app: FastifyInstance) {
       const { pollId } = requestParamsSchema.parse(request.params);
       const { optionId } = requestBodySchema.parse(request.body);
 
-      return reply.status(201).send();
+      let { sessionId } = request.cookies;
+      if (!sessionId) {
+        sessionId = randomUUID();
+        reply.setCookie("sessionId", sessionId, {
+          path: "/",
+          maxAge: 60 * 60 * 24 * 30, // 30 days
+          signed: true,
+          httpOnly: true,
+        });
+      }
+
+      return reply.status(201).send({ sessionId });
     }
   );
 }
