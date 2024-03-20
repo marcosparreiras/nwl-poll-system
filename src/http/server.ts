@@ -1,10 +1,9 @@
 import fastify from "fastify";
+import { createPoll } from "./routes/create-poll";
 
 const app = fastify();
 
-app.get("/", (_request, reply) => {
-  return reply.status(200).send("Hello world");
-});
+app.register(createPoll);
 
 const PORT = 3333;
 app.listen({ port: PORT }).then(() => {
