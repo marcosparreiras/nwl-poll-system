@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx --watch ./src/http/server.ts"
+    "dev": "tsx --watch ./src/http/server.ts",
+    "test": "vitest"
   },
   "keywords": [],
   "author": "",
@@ -13,7 +14,8 @@
     "@types/node": "^20.11.30",
     "prisma": "^5.11.0",
     "tsx": "^4.7.1",
-    "typescript": "^5.4.2"
+    "typescript": "^5.4.2",
+    "vitest": "^1.4.0"
   },
   "dependencies": {
     "@fastify/cookie": "^9.3.1",

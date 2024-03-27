@@ -1,12 +1,12 @@
 import { UniqueEntityId } from "../object-values/unique-entity-id";
 import { Entity } from "./entity";
 
-interface PollOptionsProps {
+interface PollOptionProps {
   title: string;
   pollId: UniqueEntityId;
 }
 
-export class PollOptions extends Entity<PollOptionsProps> {
+export class PollOption extends Entity<PollOptionProps> {
   get title(): string {
     return this.props.title;
   }
@@ -15,8 +15,8 @@ export class PollOptions extends Entity<PollOptionsProps> {
     return this.props.pollId;
   }
 
-  public static create(props: PollOptionsProps, id?: UniqueEntityId) {
-    return new PollOptions(
+  public static create(props: PollOptionProps, id?: UniqueEntityId) {
+    return new PollOption(
       {
         title: props.title,
         pollId: props.pollId,
