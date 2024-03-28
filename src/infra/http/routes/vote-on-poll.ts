@@ -1,9 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import { AppError } from "../../../domain/application/errors/app-error";
+import { makeVoteOnPollUseCase } from "../../factories/make-vote-on-poll-use-case";
 import z from "zod";
-import { prisma } from "../../lib/prisma";
-import { redis } from "../../lib/redis";
-import { voting } from "../../utils/voting-pub-sub";
 
 export async function voteOnPoll(app: FastifyInstance) {
   app.post(
@@ -17,39 +16,7 @@ export async function voteOnPoll(app: FastifyInstance) {
         pollOptionId: z.string().uuid(),
       });
 
-      const { pollId } = requestParamsSchema.parse(request.params);
-      const { pollOptionId } = requestBodySchema.parse(request.body);
-
       let { sessionId } = request.cookies;
-
-      if (sessionId) {
-        const userPreviousVoteOnPoll = await prisma.vote.findUnique({
-          where: { sessionId_pollId: { sessionId, pollId } },
-        });
-
-        if (
-          userPreviousVoteOnPoll &&
-          userPreviousVoteOnPoll.pollOptionId !== pollOptionId
-        ) {
-          await prisma.vote.delete({
-            where: { id: userPreviousVoteOnPoll.id },
-          });
-          const votes = await redis.zincrby(
-            pollId,
-            -1,
-            userPreviousVoteOnPoll.pollOptionId
-          );
-          voting.publish(pollId, {
-            pollOptionId: userPreviousVoteOnPoll.pollOptionId,
-            votes: Number(votes),
-          });
-        } else if (userPreviousVoteOnPoll) {
-          return reply
-            .status(400)
-            .send({ message: "You already voted on this option" });
-        }
-      }
-
       if (!sessionId) {
         sessionId = randomUUID();
         reply.setCookie("sessionId", sessionId, {
@@ -60,12 +27,22 @@ export async function voteOnPoll(app: FastifyInstance) {
         });
       }
 
-      await prisma.vote.create({ data: { sessionId, pollId, pollOptionId } });
-      const votes = await redis.zincrby(pollId, 1, pollOptionId);
-
-      voting.publish(pollId, { pollOptionId, votes: Number(votes) });
-
-      return reply.status(201).send();
+      try {
+        const { pollId } = requestParamsSchema.parse(request.params);
+        const { pollOptionId } = requestBodySchema.parse(request.body);
+        const voteOnPollUseCase = makeVoteOnPollUseCase();
+        await voteOnPollUseCase.execute({
+          pollId,
+          pollOptionId,
+          userId: sessionId,
+        });
+        return reply.status(201).send();
+      } catch (error: unknown) {
+        if (error instanceof AppError) {
+          return reply.status(400).send({ message: error.message });
+        }
+        return reply.status(500).send({ message: "Internal server error" });
+      }
     }
   );
 }

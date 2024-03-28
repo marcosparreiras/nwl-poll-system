@@ -9,7 +9,7 @@ import { Vote } from "../../enterprise/entities/vote";
 import { makeVote } from "../../../../test/factories/make-vote";
 import { DuplicateVoteError } from "../errors/duplicate-vote-error";
 import { InMemoryVotesCountRepository } from "../../../../test/repositories/in-memory-votes-count-repository";
-import { VoteEvents, voteEvents } from "../../enterprise/events/vote-events";
+import { voteEvents } from "../../enterprise/events/vote-events";
 
 describe("VoteOnPoll [use-case]", () => {
   let inMemoryPollRepository: InMemoryPollRepository;

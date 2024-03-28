@@ -31,7 +31,7 @@ model PollOption {
 }
 
 model Vote {
-  id Int @id @default(autoincrement())
+  id String @id @default(uuid())
   sessionId String 
   pollId String
   pollOptionId String
