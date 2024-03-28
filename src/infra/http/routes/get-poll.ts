@@ -30,9 +30,6 @@ export async function getPoll(app: FastifyInstance) {
         return acc;
       }, {});
 
-      console.log(result);
-      console.log(votes);
-
       return reply.status(200).send({
         poll: {
           id: poll.id,
