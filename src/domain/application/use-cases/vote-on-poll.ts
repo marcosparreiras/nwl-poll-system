@@ -1,9 +1,11 @@
 import { Vote } from "../../enterprise/entities/vote";
+import { voteEvents } from "../../enterprise/events/vote-events";
 import { UniqueEntityId } from "../../enterprise/object-values/unique-entity-id";
 import { DuplicateVoteError } from "../errors/duplicate-vote-error";
 import { InvalidPollOptionError } from "../errors/invalid-poll-option-error";
 import { PollNotFoundError } from "../errors/poll-not-found-error";
 import { PollRepository } from "../repositories/poll-repository";
+import { VotesCountRepository } from "../repositories/votes-count-repository";
 
 interface VoteOnPollUseCaseRequest {
   pollId: string;
@@ -16,7 +18,10 @@ interface VoteOnPollUseCaseResponse {
 }
 
 export class VoteOnPollUseCase {
-  public constructor(private pollRepository: PollRepository) {}
+  public constructor(
+    private pollRepository: PollRepository,
+    private votesCountRepository: VotesCountRepository
+  ) {}
 
   public async execute({
     pollId,
@@ -36,12 +41,26 @@ export class VoteOnPollUseCase {
       throw new InvalidPollOptionError();
     }
 
-    const userVote = await this.pollRepository.findUserPollVote(userId, pollId);
-    if (userVote && userVote.pollOptionId.toString() === pollOptionId) {
+    const userPreviousVote = await this.pollRepository.findUserPollVote(
+      userId,
+      pollId
+    );
+    if (
+      userPreviousVote &&
+      userPreviousVote.pollOptionId.toString() === pollOptionId
+    ) {
       throw new DuplicateVoteError();
     }
-    if (userVote) {
+    if (userPreviousVote) {
       await this.pollRepository.deleteUserPollVote(userId, pollId);
+      const votes = await this.votesCountRepository.decrementOne(
+        pollId,
+        userPreviousVote.pollOptionId.toString()
+      );
+      voteEvents.publish(pollId, {
+        pollOptionId: userPreviousVote.pollOptionId.toString(),
+        votes,
+      });
     }
 
     const vote = Vote.create({
@@ -51,6 +70,11 @@ export class VoteOnPollUseCase {
     });
 
     await this.pollRepository.createPollVote(vote);
+    const votes = await this.votesCountRepository.incrementOne(
+      pollId,
+      pollOptionId
+    );
+    voteEvents.publish(pollId, { pollOptionId, votes });
 
     return { vote };
   }
