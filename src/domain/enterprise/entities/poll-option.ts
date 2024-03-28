@@ -1,7 +1,7 @@
 import { UniqueEntityId } from "../object-values/unique-entity-id";
 import { Entity } from "./entity";
 
-interface PollOptionProps {
+export interface PollOptionProps {
   title: string;
   pollId: UniqueEntityId;
 }

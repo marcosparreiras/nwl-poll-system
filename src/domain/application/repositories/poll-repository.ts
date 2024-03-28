@@ -4,8 +4,8 @@ import { Vote } from "../../enterprise/entities/vote";
 import { PollWithOptions } from "../../enterprise/object-values/PollWithOptions";
 
 export interface PollRepository {
-  createPollWithOptions(poll: Poll, options: PollOption[]): Promise<void>;
   findPollByIdWithOptions(pollId: string): Promise<PollWithOptions | null>;
+  createPollWithOptions(poll: Poll, options: PollOption[]): Promise<void>;
   findUserPollVote(userId: string, pollId: string): Promise<Vote | null>;
   deleteUserPollVote(userId: string, pollId: string): Promise<void>;
   createPollVote(vote: Vote): Promise<void>;

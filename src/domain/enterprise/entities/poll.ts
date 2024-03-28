@@ -2,7 +2,7 @@ import { UniqueEntityId } from "../object-values/unique-entity-id";
 import { Entity } from "./entity";
 import { Optional } from "./types/optional";
 
-interface PollProps {
+export interface PollProps {
   title: string;
   createdAt: Date;
   updatedAt?: Date | null;

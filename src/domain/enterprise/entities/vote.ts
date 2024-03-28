@@ -2,8 +2,9 @@ import { UniqueEntityId } from "../object-values/unique-entity-id";
 import { Entity } from "./entity";
 import { Optional } from "./types/optional";
 
-interface VoteProps {
+export interface VoteProps {
   userId: UniqueEntityId;
+  pollId: UniqueEntityId;
   pollOptionId: UniqueEntityId;
   createdAt: Date;
 }
@@ -11,6 +12,10 @@ interface VoteProps {
 export class Vote extends Entity<VoteProps> {
   get userId(): UniqueEntityId {
     return this.props.userId;
+  }
+
+  get pollId(): UniqueEntityId {
+    return this.props.pollId;
   }
 
   get pollOptionId(): UniqueEntityId {
@@ -28,6 +33,7 @@ export class Vote extends Entity<VoteProps> {
     return new Vote(
       {
         userId: props.userId,
+        pollId: props.pollId,
         pollOptionId: props.pollOptionId,
         createdAt: props.createdAt ?? new Date(),
       },
