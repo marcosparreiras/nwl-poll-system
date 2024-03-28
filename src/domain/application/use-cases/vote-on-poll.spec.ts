@@ -8,14 +8,20 @@ import { InvalidPollOptionError } from "../errors/invalid-poll-option-error";
 import { Vote } from "../../enterprise/entities/vote";
 import { makeVote } from "../../../../test/factories/make-vote";
 import { DuplicateVoteError } from "../errors/duplicate-vote-error";
+import { InMemoryVotesCountRepository } from "../../../../test/repositories/in-memory-votes-count-repository";
 
 describe("VoteOnPoll [use-case]", () => {
   let inMemoryPollRepository: InMemoryPollRepository;
+  let inMemoryVotesCountRepository: InMemoryVotesCountRepository;
   let sut: VoteOnPollUseCase;
 
   beforeEach(() => {
     inMemoryPollRepository = new InMemoryPollRepository();
-    sut = new VoteOnPollUseCase(inMemoryPollRepository);
+    inMemoryVotesCountRepository = new InMemoryVotesCountRepository();
+    sut = new VoteOnPollUseCase(
+      inMemoryPollRepository,
+      inMemoryVotesCountRepository
+    );
   });
 
   it("Should be able to vote on a poll option", async () => {
@@ -130,5 +136,62 @@ describe("VoteOnPoll [use-case]", () => {
       (item) => item.id.toString() === result.vote.id.toString()
     );
     expect(voteOnRepository).toBeTruthy();
+  });
+
+  it("Should be able to manage the vote count when a new vote is created", async () => {
+    const userId = new UniqueEntityId();
+    const poll = makePoll();
+    const pollOptions = new Array(2).fill(null).map((_) => {
+      return makePollOption({ pollId: poll.id });
+    });
+
+    inMemoryPollRepository.polls.push(poll);
+    inMemoryPollRepository.options.push(...pollOptions);
+
+    const result = await sut.execute({
+      userId: userId.toString(),
+      pollId: poll.id.toString(),
+      pollOptionId: pollOptions[0].id.toString(),
+    });
+
+    expect(result.vote).toBeTruthy();
+    const voteCount =
+      inMemoryVotesCountRepository.votesCount[poll.id.toString()][
+        pollOptions[0].id.toString()
+      ];
+    expect(voteCount).toEqual(1);
+  });
+
+  it("Should be able to manage the vote count when a user change your vote", async () => {
+    const userId = new UniqueEntityId();
+    const poll = makePoll();
+    const pollOptions = new Array(2).fill(null).map((_) => {
+      return makePollOption({ pollId: poll.id });
+    });
+
+    inMemoryPollRepository.polls.push(poll);
+    inMemoryPollRepository.options.push(...pollOptions);
+
+    await sut.execute({
+      userId: userId.toString(),
+      pollId: poll.id.toString(),
+      pollOptionId: pollOptions[0].id.toString(),
+    });
+
+    await sut.execute({
+      userId: userId.toString(),
+      pollId: poll.id.toString(),
+      pollOptionId: pollOptions[1].id.toString(),
+    });
+
+    const voteCount =
+      inMemoryVotesCountRepository.votesCount[poll.id.toString()];
+
+    expect(voteCount).toEqual(
+      expect.objectContaining({
+        [pollOptions[0].id.toString()]: 0,
+        [pollOptions[1].id.toString()]: 1,
+      })
+    );
   });
 });
