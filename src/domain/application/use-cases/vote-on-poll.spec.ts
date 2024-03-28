@@ -9,6 +9,7 @@ import { Vote } from "../../enterprise/entities/vote";
 import { makeVote } from "../../../../test/factories/make-vote";
 import { DuplicateVoteError } from "../errors/duplicate-vote-error";
 import { InMemoryVotesCountRepository } from "../../../../test/repositories/in-memory-votes-count-repository";
+import { VoteEvents, voteEvents } from "../../enterprise/events/vote-events";
 
 describe("VoteOnPoll [use-case]", () => {
   let inMemoryPollRepository: InMemoryPollRepository;
@@ -193,5 +194,33 @@ describe("VoteOnPoll [use-case]", () => {
         [pollOptions[1].id.toString()]: 1,
       })
     );
+  });
+
+  it("Should be able to publish a vote-event when a new vote is created", async () => {
+    const spy = vi.spyOn(voteEvents, "publish");
+    const userId = new UniqueEntityId();
+    const poll = makePoll();
+    const pollOptions = new Array(2).fill(null).map((_) => {
+      return makePollOption({ pollId: poll.id });
+    });
+
+    inMemoryPollRepository.polls.push(poll);
+    inMemoryPollRepository.options.push(...pollOptions);
+
+    await sut.execute({
+      userId: userId.toString(),
+      pollId: poll.id.toString(),
+      pollOptionId: pollOptions[0].id.toString(),
+    });
+
+    expect(spy).toBeCalledTimes(1);
+
+    await sut.execute({
+      userId: userId.toString(),
+      pollId: poll.id.toString(),
+      pollOptionId: pollOptions[1].id.toString(),
+    });
+
+    expect(spy).toBeCalledTimes(3);
   });
 });
