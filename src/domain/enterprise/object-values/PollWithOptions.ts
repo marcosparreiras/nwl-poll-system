@@ -1,7 +1,7 @@
 import { Poll } from "../entities/poll";
 import { PollOption } from "../entities/poll-option";
-import { UniqueEntityId } from "./unique-entity-id";
-import { ValueObject } from "./value-object";
+import { UniqueEntityId } from "../entities/core/unique-entity-id";
+import { ValueObject } from "./core/value-object";
 
 interface PollAndOptions {
   poll: Poll;

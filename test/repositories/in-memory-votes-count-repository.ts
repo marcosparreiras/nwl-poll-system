@@ -24,4 +24,8 @@ export class InMemoryVotesCountRepository implements VotesCountRepository {
     this.votesCount[pollId][pollOptionId]--;
     return this.votesCount[pollId][pollOptionId];
   }
+
+  async fetchByPollId(pollId: string): Promise<Record<string, number>> {
+    return this.votesCount[pollId] ?? {};
+  }
 }

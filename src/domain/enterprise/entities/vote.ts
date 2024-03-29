@@ -1,5 +1,5 @@
-import { UniqueEntityId } from "../object-values/unique-entity-id";
-import { Entity } from "./entity";
+import { UniqueEntityId } from "./core/unique-entity-id";
+import { Entity } from "./core/entity";
 import { Optional } from "./types/optional";
 
 export interface VoteProps {

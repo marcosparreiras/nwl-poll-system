@@ -1,6 +1,6 @@
 import { Poll as PrismaPoll } from "@prisma/client";
 import { Poll } from "../../../../domain/enterprise/entities/poll";
-import { UniqueEntityId } from "../../../../domain/enterprise/object-values/unique-entity-id";
+import { UniqueEntityId } from "../../../../domain/enterprise/entities/core/unique-entity-id";
 
 export class PrismaPollMapper {
   static toDomain(data: PrismaPoll): Poll {

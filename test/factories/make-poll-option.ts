@@ -3,7 +3,7 @@ import {
   PollOption,
   PollOptionProps,
 } from "../../src/domain/enterprise/entities/poll-option";
-import { UniqueEntityId } from "../../src/domain/enterprise/object-values/unique-entity-id";
+import { UniqueEntityId } from "../../src/domain/enterprise/entities/core/unique-entity-id";
 
 export function makePollOption(
   overide: Partial<PollOptionProps> = {},

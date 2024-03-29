@@ -1,5 +1,5 @@
 import { Poll, PollProps } from "../../src/domain/enterprise/entities/poll";
-import { UniqueEntityId } from "../../src/domain/enterprise/object-values/unique-entity-id";
+import { UniqueEntityId } from "../../src/domain/enterprise/entities/core/unique-entity-id";
 import { faker } from "@faker-js/faker";
 
 export function makePoll(

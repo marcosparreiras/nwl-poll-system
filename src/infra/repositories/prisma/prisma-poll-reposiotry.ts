@@ -3,7 +3,7 @@ import { Poll } from "../../../domain/enterprise/entities/poll";
 import { PollOption } from "../../../domain/enterprise/entities/poll-option";
 import { Vote } from "../../../domain/enterprise/entities/vote";
 import { PollWithOptions } from "../../../domain/enterprise/object-values/PollWithOptions";
-import { UniqueEntityId } from "../../../domain/enterprise/object-values/unique-entity-id";
+import { UniqueEntityId } from "../../../domain/enterprise/entities/core/unique-entity-id";
 import { prisma } from "./prisma";
 import { PrismaOptionMapper } from "./mappers/prisma-option-mapper";
 import { PrismaPollMapper } from "./mappers/prisma-poll-mapper";

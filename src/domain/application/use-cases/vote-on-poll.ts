@@ -1,6 +1,6 @@
 import { Vote } from "../../enterprise/entities/vote";
 import { voteEvents } from "../../enterprise/events/vote-events";
-import { UniqueEntityId } from "../../enterprise/object-values/unique-entity-id";
+import { UniqueEntityId } from "../../enterprise/entities/core/unique-entity-id";
 import { DuplicateVoteError } from "../errors/duplicate-vote-error";
 import { InvalidPollOptionError } from "../errors/invalid-poll-option-error";
 import { PollNotFoundError } from "../errors/poll-not-found-error";

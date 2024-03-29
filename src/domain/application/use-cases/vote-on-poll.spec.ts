@@ -2,7 +2,7 @@ import { makePoll } from "../../../../test/factories/make-poll";
 import { makePollOption } from "../../../../test/factories/make-poll-option";
 import { InMemoryPollRepository } from "../../../../test/repositories/in-memory-poll-repository";
 import { VoteOnPollUseCase } from "./vote-on-poll";
-import { UniqueEntityId } from "../../enterprise/object-values/unique-entity-id";
+import { UniqueEntityId } from "../../enterprise/entities/core/unique-entity-id";
 import { PollNotFoundError } from "../errors/poll-not-found-error";
 import { InvalidPollOptionError } from "../errors/invalid-poll-option-error";
 import { Vote } from "../../enterprise/entities/vote";
