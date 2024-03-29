@@ -13,7 +13,7 @@ export async function createPoll(request: FastifyRequest, reply: FastifyReply) {
     const createPollUseCase = makeCreatePollUseCase();
     const { poll } = await createPollUseCase.execute({ title, options });
     return reply.status(201).send({ pollId: poll.id.toString() });
-  } catch (Error: unknown) {
+  } catch (error: unknown) {
     return reply.status(500).send({ message: "Internal server error" });
   }
 }

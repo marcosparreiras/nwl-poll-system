@@ -8,15 +8,20 @@ import { prisma } from "./prisma";
 import { PrismaOptionMapper } from "./mappers/prisma-option-mapper";
 import { PrismaPollMapper } from "./mappers/prisma-poll-mapper";
 import { PrismaVoteMapper } from "./mappers/prisma-vote-mapper";
+import { Optional } from "@prisma/client/runtime/library";
+import { PollOption as PrismaPollOption } from "@prisma/client";
 
 export class PrismaPollRepository implements PollRepository {
   async createPollWithOptions(
     poll: Poll,
     options: PollOption[]
   ): Promise<void> {
-    const optionsData = options.map((option) =>
-      PrismaOptionMapper.toPrisma(option)
-    );
+    const optionsData = options.map((option) => {
+      const optionData: Optional<PrismaPollOption, "pollId"> =
+        PrismaOptionMapper.toPrisma(option);
+      delete optionData.pollId;
+      return optionData;
+    });
 
     const pollData = PrismaPollMapper.toPrisma(poll);
 
