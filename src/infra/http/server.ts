@@ -5,6 +5,7 @@ import { createPoll } from "./routes/create-poll";
 import { getPoll } from "./routes/get-poll";
 import { voteOnPoll } from "./routes/vote-on-poll";
 import { pollResults } from "./ws/poll-results";
+import { env } from "../env";
 
 const app = fastify();
 
@@ -20,7 +21,6 @@ app.register(voteOnPoll);
 
 app.register(pollResults);
 
-const PORT = 3333;
-app.listen({ port: PORT }).then(() => {
-  console.log(`Server is running on port ${PORT}`);
+app.listen({ port: env.PORT }).then(() => {
+  console.log(`Server is running on port ${env.PORT}`);
 });
