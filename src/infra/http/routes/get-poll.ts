@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { prisma } from "../../repositories/prisma/prisma";
-import { redis } from "../../repositories/redis/redis";
+import { makeGetPollUseCase } from "../../factories/make-get-poll-use-case";
+import { AppError } from "../../../domain/application/errors/app-error";
 import z from "zod";
 
 export async function getPoll(app: FastifyInstance) {
@@ -10,39 +10,17 @@ export async function getPoll(app: FastifyInstance) {
       const requestParamsSchema = z.object({
         pollId: z.string().uuid(),
       });
-
-      const { pollId } = requestParamsSchema.parse(request.params);
-
-      const poll = await prisma.poll.findUnique({
-        where: { id: pollId },
-        include: { options: { select: { id: true, title: true } } },
-      });
-
-      if (!poll) {
-        return reply.status(400).send({ message: "poll not found" });
-      }
-
-      const result = await redis.zrange(poll.id, 0, -1, "WITHSCORES");
-      const votes = result.reduce<Record<string, number>>((acc, cur, index) => {
-        if (index % 2 == 0) {
-          acc[cur] = Number(result[index + 1]);
+      try {
+        const { pollId } = requestParamsSchema.parse(request.params);
+        const getPollUseCase = makeGetPollUseCase();
+        const { pollWithOptions } = await getPollUseCase.execute({ pollId });
+        return reply.status(200).send({ poll: pollWithOptions });
+      } catch (error: unknown) {
+        if (error instanceof AppError) {
+          return reply.status(400).send({ message: error.message });
         }
-        return acc;
-      }, {});
-
-      return reply.status(200).send({
-        poll: {
-          id: poll.id,
-          title: poll.title,
-          options: poll.options.map((option) => {
-            return {
-              id: option.id,
-              title: option.title,
-              score: votes[option.id] ?? 0,
-            };
-          }),
-        },
-      });
+        return reply.status(500).send({ message: "Internal server error" });
+      }
     }
   );
 }
